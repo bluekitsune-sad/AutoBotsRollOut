@@ -22,23 +22,25 @@ jobs:
           git config --local user.email "saadshaan619@gmail.com"
           git config --local user.name "bluekitsune-sad"
 
-          arr[0]="chore(bot): 😂 auto commit"
-          arr[1]="chore(bot): 😱 auto commit"
-          arr[2]="chore(bot): 👿 auto commit"
-          arr[3]="chore(bot): 💩 auto commit"
-          arr[4]="chore(bot): 🙏 auto commit"
-          arr[5]="chore(bot): 🙈 auto commit"
-          arr[6]="chore(bot): 🐐 auto commit"
-          arr[7]="chore(bot): 🤖 auto commit"
-          arr[8]="chore(bot): 🟩 auto commit"
-          arr[9]="chore(bot): 👻 auto commit"
-
+          # Define an array of random commit messages
+          arr=("chore(bot): 😂 auto commit" 
+          "chore(bot): 😱 auto commit" 
+          "chore(bot): 👿 auto commit" 
+          "chore(bot): 💩 auto commit" 
+          "chore(bot): 🙏 auto commit" 
+          "chore(bot): 🙈 auto commit" 
+          "chore(bot): 🐐 auto commit" 
+          "chore(bot): 🤖 auto commit" 
+          "chore(bot): 🟩 auto commit" 
+          "chore(bot): 👻 auto commit")
+          
+          # Get a random index for the array
           rand=$[$RANDOM % ${#arr[@]}]
-
-          # git commit -m "${arr[$rand]}"
-
+          
+        
           # Add and commit the changes
           git add LAST_UPDATED
+          # Use the randomly selected commit message
           git commit -m "${arr[$rand]}"
 
           # Push the changes to the repository
