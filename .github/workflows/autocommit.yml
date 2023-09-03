@@ -1,4 +1,4 @@
-name: generate animation
+name: auto
 
 on:
   # run automatically every 24 hours
@@ -31,5 +31,4 @@ jobs:
         uses: ad-m/github-push-action@v0.6.0
         with:
           branch: main
-        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
