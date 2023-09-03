@@ -35,11 +35,11 @@ jobs:
 
           rand=$[$RANDOM % ${#arr[@]}]
 
-          git commit -m "${arr[$rand]}"
+          # git commit -m "${arr[$rand]}"
 
           # Add and commit the changes
           git add LAST_UPDATED
-          git commit -m "Update LAST_UPDATED file"
+          git commit -m "${arr[$rand]}"
 
           # Push the changes to the repository
           git push origin main  # Change 'master' to your branch if needed
