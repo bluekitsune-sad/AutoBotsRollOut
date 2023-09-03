@@ -1,4 +1,4 @@
-name: Scheduled Workflow with Commit
+name: Scheduling
 
 on:
   schedule:
