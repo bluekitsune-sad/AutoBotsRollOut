@@ -1,57 +1,29 @@
-name: Auto commit
+name: Scheduled Workflow with Commit
 
 on:
-  push:
-    branches:
-      - master
-
   schedule:
-    - cron: "*/1 * * * *" # https://crontab.guru/#20_4_*_*_*
-  # allows to manually run the job at any time
-  workflow_dispatch:
+    - cron: "*/1 * * * *"
 
 jobs:
-  auto_commit:
-    permissions:
-      contents: write
+  commit:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+
     steps:
-      - name: DEBUG
-        run: echo "::debug::Ref = ${{github.ref}}"
-      - uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-          fetch-depth: 0
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Modify last update
+      - name: Modify and Commit
         run: |
-          d=`date '+%Y-%m-%dT%H:%M:%SZ'`
-          echo $d > LAST_UPDATED
+          # Modify a file (e.g., update a timestamp)
+          echo $(date '+%Y-%m-%dT%H:%M:%SZ') > LAST_UPDATED
 
-      - name: Commit changes
-        run: |
-          git config --local user.email "saadshaan619@gmail.com"
-          git config --local user.name "bluekitsune-sad"
-          git add -A
+          # Configure Git user information
+          git config --local user.email "your-email@example.com"
+          git config --local user.name "Your Name"
 
-          arr[0]="chore(bot): 😂 auto commit"
-          arr[1]="chore(bot): 😱 auto commit"
-          arr[2]="chore(bot): 👿 auto commit"
-          arr[3]="chore(bot): 💩 auto commit"
-          arr[4]="chore(bot): 🙏 auto commit"
-          arr[5]="chore(bot): 🙈 auto commit"
-          arr[6]="chore(bot): 🐐 auto commit"
-          arr[7]="chore(bot): 🤖 auto commit"
-          arr[8]="chore(bot): 🟩 auto commit"
-          arr[9]="chore(bot): 👻 auto commit"
+          # Add and commit the changes
+          git add LAST_UPDATED
+          git commit -m "Update LAST_UPDATED file"
 
-          rand=$[$RANDOM % ${#arr[@]}]
-
-          git commit -m "${arr[$rand]}"
-
-      - name: GitHub Push
-        uses: ad-m/github-push-action@master
-        with:
-          directory: "."
-          github_token: "${{ secrets.GITHUB_TOKEN }}"
+          # Push the changes to the repository
+          git push origin master  # Change 'master' to your branch if needed
