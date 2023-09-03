@@ -1,34 +1,61 @@
-name: auto
+name: Auto commit
 
 on:
-  # run automatically every 24 hours
-  schedule:
-    - cron: "*/1 * * * *"
-  
-  # allows to manually run the job at any time
-  workflow_dispatch:
-  
-  # run on every push on the main branch
   push:
     branches:
-    - main
-    
-  
+      - master
+
+  schedule:
+    - cron: "*/1 * * * *" # https://crontab.guru/#20_4_*_*_*
+  # allows to manually run the job at any time
+  workflow_dispatch:
 
 jobs:
-  generate:
-    permissions: 
+  auto_commit:
+    permissions:
       contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    
     steps:
-      - name: Commit 
-        run: echo $(date '+%Y-%m-%dT%H:%M:%SZ') >> LAST_UPDATED
-
-      # Push the changes to the main branch
-      - name: Push changes to main branch
-        uses: ad-m/github-push-action@v0.6.0
+      - name: DEBUG
+        run: echo "::debug::Ref = ${{github.ref}}"
+      - uses: actions/checkout@v3
         with:
-          branch: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Modify last update
+        run: |
+          d=`date '+%Y-%m-%dT%H:%M:%SZ'`
+          echo $d > LAST_UPDATED
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "saadshaan619@gmail.com"
+          git config --local user.name "bluekitsune-sad"
+          git add -A
+
+          # Define an array of random commit messages
+          arr=("chore(bot): 😂 auto commit" 
+          "chore(bot): 😱 auto commit" 
+          "chore(bot): 👿 auto commit" 
+          "chore(bot): 💩 auto commit" 
+          "chore(bot): 🙏 auto commit" 
+          "chore(bot): 🙈 auto commit" 
+          "chore(bot): 🐐 auto commit" 
+          "chore(bot): 🤖 auto commit" 
+          "chore(bot): 🟩 auto commit" 
+          "chore(bot): 👻 auto commit")
+
+          # Get a random index for the array
+          rand=$[$RANDOM % ${#arr[@]}]
+
+          # Use the randomly selected commit message
+          git commit -m "${arr[$rand]}"
+
+      - name: GitHub Push
+        uses: ad-m/github-push-action@master
+        with:
+          node-version: "16"
+          directory: "."
+          github_token: "${{ secrets.GITHUB_TOKEN }}"
