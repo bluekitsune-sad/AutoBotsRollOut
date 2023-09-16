@@ -7,7 +7,7 @@ on:
       - master
       
   schedule:
-  - cron: "0 */24 * * *" # See https://crontab.guru/#0_7,9,11_*_*_1,3
+  - cron: "7 7,9,10 * * 6,0,4" # See https://crontab.guru/#0_7,9,11_*_*_1,3
 
 jobs:
   auto_commit:
@@ -41,6 +41,11 @@ jobs:
           arr[7]="chore(bot): 🤖 auto commit"
           arr[8]="chore(bot): 🟩 auto commit"
           arr[9]="chore(bot): 👻 auto commit"
+          arr[10]="chore(bot): 👾 auto commit"
+          arr[10]="chore(bot): 🦊 auto commit"
+          arr[10]="chore(bot): 🐉 auto commit"
+          arr[10]="chore(bot): (☞ﾟヮﾟ)☞ auto commit"
+          arr[10]="chore(bot): ಠ_ಠ auto commit"
           
           rand=$[$RANDOM % ${#arr[@]}]
           
