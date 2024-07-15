@@ -8,7 +8,7 @@ on:
       
   schedule:
   # - cron: "7 6,7,8,9,10 * * 6,0,4" # See https://crontab.guru/#0_7,9,11_*_*_1,3
-  - cron: "7 7,8,9,10 * * *" 
+  - cron: "0 7,9,11 * * 7,6" 
 
 jobs:
   auto_commit:
