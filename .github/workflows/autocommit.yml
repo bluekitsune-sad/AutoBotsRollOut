@@ -45,8 +45,21 @@ jobs:
           arr[10]="chore(bot): 👾 Alien technology, auto commit!"
           arr[11]="chore(bot): 🦊 Cunning like a fox, auto commit!"
           arr[12]="chore(bot): 🐉 Dragon-powered auto commit!"
+          arr[14]="chore(bot): ☕️ Fueling up on coffee for the auto commit marathon."
           arr[13]="chore(bot): (☞ﾟヮﾟ)☞ Auto commit with style!"
           arr[14]="chore(bot): ಠ_ಠ Auto commit judging you!"
+          arr[14]="chore(bot): (⇀‿‿↼)  Zzz... still sleepy, auto-committing..."
+          arr[14]="chore(bot): (≖‿‿≖) Waking up and ready to commit!"
+          arr[14]="chore(bot): (◕‿‿◕) Just your average, everyday auto-commit."
+          arr[14]="chore(bot): ( ⚆⚆), (☉☉ ) Observing the codebase..."
+          arr[14]="chore(bot): ( ◕‿◕), (◕‿◕ ) Happy to observe a clean commit!"
+          arr[14]="chore(bot): (°▃▃°) Buckle up, this auto-commit is intense!"
+          arr[14]="chore(bot): (✜‿‿✜) This auto-commit is looking sharp!"
+          arr[14]="chore(bot): (♥‿‿♥) Sending friendly vibes with this auto-commit!"
+          arr[14]="chore(bot): (╥☁╥ ) Oh no, something went wrong with the auto-commit..."
+          arr[14]="chore(bot): (ب__ب) Feeling a bit lonely during this auto-commit..."
+          arr[14]="chore(bot): (☓‿‿☓) Uh oh, the auto-commit seems to have broken like me!"
+          arr[14]="chore(bot): (#__#) Debugging mode activated for this auto-commit!"
           
           rand=$[$RANDOM % ${#arr[@]}]
           
