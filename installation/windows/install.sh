@@ -124,6 +124,29 @@ async function installOrUpdateWSL() {
   }
 }
 
+// Function to update drivers using Windows Update (optional)
+async function updateDrivers() {
+  try {
+    console.log('Updating drivers via Windows Update...');
+    await runCommand('powershell -Command "Install-WindowsUpdate -AcceptAll -IgnoreReboot"');
+    console.log('Drivers update completed!');
+  } catch (error) {
+    console.error('Error updating drivers using Windows Update:', error);
+  }
+}
+
+// Function to use Driver Booster for updating drivers (if installed via Chocolatey)
+async function updateDriversWithDriverBooster() {
+  try {
+    console.log('Using Driver Booster to update drivers...');
+    await runCommand('choco install driverbooster -y'); // Install Driver Booster
+    await runCommand('driverbooster update'); // Update drivers with Driver Booster
+    console.log('Driver Booster update completed!');
+  } catch (error) {
+    console.error('Error updating drivers with Driver Booster:', error);
+  }
+}
+
 // Main function that runs all tasks sequentially
 async function main() {
   try {
@@ -136,7 +159,11 @@ async function main() {
     // Step 3: Install or update WSL
     await installOrUpdateWSL();
 
-    // Step 4: Install or upgrade all the packages
+    // Step 4: updating drivers
+    // Update drivers either via Windows Update or Driver Booster
+    await updateDrivers(); // or use await updateDriversWithDriverBooster();
+
+    // Step 5: Install or upgrade all the packages
     await installPackages();
     
     console.log('All packages processed.'); // Final success message
