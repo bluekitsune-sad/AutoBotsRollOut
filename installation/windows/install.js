@@ -41,6 +41,17 @@ async function updateChocolatey() {
   await runCommand('choco upgrade chocolatey -y'); // Upgrade Chocolatey to the latest version
 }
 
+// Check in the choco list for already downloaded packages
+async function checkIfPackageInstalled(pkg) {
+  try {
+    const result = await runCommand(`choco list --local-only ${pkg}`);
+    return result.includes(pkg);
+  } catch (error) {
+    return false;
+  }
+}
+
+
 // Function to install or upgrade the list of packages
 async function installPackages() {
   // List of software packages to install or upgrade with Chocolatey
@@ -92,9 +103,14 @@ async function installPackages() {
   // Loop through each package and try to install or upgrade it using Chocolatey
   for (const pkg of packages) {
     try {
-      console.log(`Installing or upgrading ${pkg}...`);
-      await runCommand(`choco upgrade ${pkg} -y --ignore-checksums`); // Upgrade or install the package
-      console.log(`${pkg} installed or upgraded successfully.`); // Log success
+      const isInstalled = await checkIfPackageInstalled(pkg);
+      if (!isInstalled):
+        console.log(`Installing or upgrading ${pkg}...`);
+        await runCommand(`choco upgrade ${pkg} -y --ignore-checksums`); // Upgrade or install the package
+        console.log(`${pkg} installed or upgraded successfully.`); // Log success
+      } else {
+      console.log(`${pkg} is already installed.`);
+    }
     } catch (error) {
       // If an error occurs, log a warning
       console.log(`WARNING: Installation or upgrade of ${pkg} may have failed. Please check logs.`);
