@@ -129,10 +129,8 @@ async function checkIfPackageInstalled(pkg) {
   }
 }
 
-
 // Function to install or upgrade the list of packages
 async function installPackages() {
-
   // Loop through each package and try to install or upgrade it using Chocolatey
    const promises = packages.map(async (pkg) => {
     const isInstalled = await checkIfPackageInstalled(pkg); // Check if the package is already installed
@@ -145,6 +143,7 @@ async function installPackages() {
     }
     } catch (error) {
       // If an error occurs, log a warning
+      logToFile(`WARNING: Installation or upgrade of ${pkg} may have failed. Please check logs.`);
       console.log(`WARNING: Installation or upgrade of ${pkg} may have failed. Please check logs.`);
     }
   }
@@ -152,14 +151,18 @@ async function installPackages() {
 
 // Function to install dependencies before installing the main package
 async function installWithDependencies(pkg, dependencies) {
-  // Install each dependency first, if not already installed
+  // Install dependencies first
   for (const dep of dependencies) {
     const isDepInstalled = await checkIfPackageInstalled(dep);
     if (!isDepInstalled) {
       logToFile(`Installing dependency: ${dep}...`);
-      await runCommand(`choco install ${dep} -y`); // Install the dependency
+      await runCommand(`choco install ${dep} -y`);
     }
   }
+  // Install the main package after its dependencies
+  logToFile(`Installing ${pkg}...`);
+  await runCommand(`choco install ${pkg} -y`);
+}
 
 // Function to install and update WSL
 async function installOrUpdateWSL() {
@@ -223,9 +226,6 @@ async function main() {
 
     // Step 5: Install or upgrade all the packages
     await installPackages();
-    
-   // Install or upgrade the packages concurrently
-    await installPackagesConcurrently(packages);
 
     // Step 4: Cleanup temporary files and caches after installation
     await cleanup();
