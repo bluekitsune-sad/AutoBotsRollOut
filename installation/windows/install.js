@@ -119,22 +119,27 @@ async function checkIfPackageInstalled(pkg) {
 // Function to install or upgrade the list of packages
 async function installPackages() {
   // Loop through each package and try to install or upgrade it using Chocolatey
-   const promises = packages.map(async (pkg) => {
-    const isInstalled = await checkIfPackageInstalled(pkg); // Check if the package is already installed
-    if (!isInstalled) {
-      logToFile(`Installing ${pkg}...`);
-      await runCommand(`choco upgrade ${pkg} -y --ignore-checksums`); // Install or upgrade the package
-      logToFile(`${pkg} installed or upgraded successfully.`);
-    } else {
-      logToFile(`${pkg} is already installed.`);
-    }
+  const installPromises = packages.map(async (pkg) => {
+    try {
+      const isInstalled = await checkIfPackageInstalled(pkg); // Check if the package is already installed
+      if (!isInstalled) {
+        logToFile(`Installing ${pkg}...`);
+        await runCommand(`choco upgrade ${pkg} -y --ignore-checksums`); // Install or upgrade the package
+        logToFile(`${pkg} installed or upgraded successfully.`);
+      } else {
+        logToFile(`${pkg} is already installed.`);
+      }
     } catch (error) {
       // If an error occurs, log a warning
       logToFile(`WARNING: Installation or upgrade of ${pkg} may have failed. Please check logs.`);
       console.log(`WARNING: Installation or upgrade of ${pkg} may have failed. Please check logs.`);
     }
-  }
+  });
+
+  // Wait for all the installations to complete (in parallel)
+  await Promise.allSettled(installPromises);
 }
+
 
 // Function to install dependencies before installing the main package
 async function installWithDependencies(pkg, dependencies) {
@@ -195,6 +200,20 @@ async function updateDriversWithDriverBooster() {
   }
 }
 
+// Funtion to promp user for restrat
+async function promptForRestart() {
+  return new Promise((resolve) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+    rl.question('A system restart may be required. Do you want to restart now? (y/n): ', (answer) => {
+      rl.close();
+      resolve(answer.toLowerCase() === 'y');
+    });
+  });
+}
+
 // Main function that runs all tasks sequentially
 async function main() {
   try {
@@ -214,11 +233,11 @@ async function main() {
     // Step 5: Install or upgrade all the packages
     await installPackages();
 
-    // Step 4: Cleanup temporary files and caches after installation
+    // Step 6: Cleanup temporary files and caches after installation
     await cleanup();
 
-    // Step 5: Prompt for system restart if needed
-    await promptForRestart();
+    // Step 7: Prompt for system restart if needed
+    // await promptForRestart();
 
     // Log the success message
     logToFile('All tasks completed successfully.');
