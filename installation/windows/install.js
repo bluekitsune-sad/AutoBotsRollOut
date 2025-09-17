@@ -1,59 +1,12 @@
 const { exec } = require('child_process');
 const { platform } = require('os');
-
-// Function to execute a shell command and return a promise
-// This will allow us to use `async/await` to handle command execution and errors
-function runCommand(command) {
-  return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        reject(`Error: ${stderr || error.message}`); // Reject with error message
-      } else {
-        resolve(stdout); // Resolve with the command output
-      }
-    });
-  });
-}
-
-// Function to check if the script is running with administrator privileges
-async function checkAdminPrivileges() {
-  try {
-    // Try to execute 'NET SESSION', which requires admin privileges
-    await runCommand('NET SESSION');
-    console.log('Running with administrator privileges!');
-  } catch (error) {
-    // If it fails, that means admin privileges are not granted
-    console.log('Requesting administrative privileges...');
-    const scriptPath = process.argv[1]; // Get the path of the script
-    if (platform() === 'win32') {
-      // If on Windows, relaunch the script with elevated privileges
-      await runCommand(`powershell -Command "Start-Process -FilePath '${scriptPath}' -Verb RunAs"`);
-      process.exit(); // Exit the current process after relaunching with admin rights
-    } else {
-      console.log('Administrator privileges required for this operation.');
-    }
-  }
-}
-
-// Function to update Chocolatey itself (the package manager)
-async function updateChocolatey() {
-  console.log('Updating Chocolatey...');
-  await runCommand('choco upgrade chocolatey -y'); // Upgrade Chocolatey to the latest version
-}
-
-// Check in the choco list for already downloaded packages
-async function checkIfPackageInstalled(pkg) {
-  try {
-    const result = await runCommand(`choco list --local-only ${pkg}`);
-    return result.includes(pkg);
-  } catch (error) {
-    return false;
-  }
-}
+const fs = require('fs');
+const readline = require('readline');
 
 
-// Function to install or upgrade the list of packages
-async function installPackages() {
+// Log file path for recording installation progress
+const logFile = 'install_log.txt';
+
   // List of software packages to install or upgrade with Chocolatey
   const packages = [
     'python', // Python (Programming language)
@@ -100,16 +53,95 @@ async function installPackages() {
     'sqlite' // SQLite (Lightweight relational database engine)
   ];
 
-  // Loop through each package and try to install or upgrade it using Chocolatey
-  for (const pkg of packages) {
-    try {
-      const isInstalled = await checkIfPackageInstalled(pkg);
-      if (!isInstalled):
-        console.log(`Installing or upgrading ${pkg}...`);
-        await runCommand(`choco upgrade ${pkg} -y --ignore-checksums`); // Upgrade or install the package
-        console.log(`${pkg} installed or upgraded successfully.`); // Log success
+
+// Function to execute a shell command and return a promise
+// This will allow us to use `async/await` to handle command execution and errors
+function runCommand(command) {
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        reject(`Error: ${stderr || error.message}`); // Reject with error message
       } else {
-      console.log(`${pkg} is already installed.`);
+        resolve(stdout); // Resolve with the command output
+      }
+    });
+  });
+}
+
+// Function to check if the script is running with administrator privileges
+async function checkAdminPrivileges() {
+  try {
+    // Try to execute 'NET SESSION', which requires admin privileges
+    await runCommand('NET SESSION');
+    console.log('Running with administrator privileges!');
+  } catch (error) {
+    // If it fails, that means admin privileges are not granted
+    console.log('Requesting administrative privileges...');
+    const scriptPath = process.argv[1]; // Get the path of the script
+    if (platform() === 'win32') {
+      // If on Windows, relaunch the script with elevated privileges
+      await runCommand(`powershell -Command "Start-Process -FilePath '${scriptPath}' -Verb RunAs"`);
+      process.exit(); // Exit the current process after relaunching with admin rights
+    } else {
+      console.log('Administrator privileges required for this operation.');
+    }
+  }
+}
+
+// Function to log messages to a file
+function logToFile(message) {
+  const timestamp = new Date().toISOString(); // Add a timestamp for each log entry
+  fs.appendFileSync(logFile, `[${timestamp}] ${message}\n`); // Append the log entry to the log file
+}
+
+// Function to execute a shell command and return a promise
+function runCommand(command) {
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        reject(`Error: ${stderr || error.message}`); // Reject with error message if something goes wrong
+      } else {
+        resolve(stdout); // Resolve with the command output if it succeeds
+      }
+    });
+  });
+}
+
+// Function to update Chocolatey itself (the package manager)
+async function updateChocolatey() {
+  console.log('Updating Chocolatey...');
+  await runCommand('choco upgrade chocolatey -y'); // Upgrade Chocolatey to the latest version
+}
+
+async function cleanup() {
+  logToFile('Cleaning up temporary files and cache...');
+  await runCommand('choco clean'); // Clean up Chocolatey cache and temporary files
+  logToFile('Cleanup completed.');
+}
+
+// Check in the choco list for already downloaded packages
+async function checkIfPackageInstalled(pkg) {
+  try {
+       const result = await runCommand(`choco list --local-only ${pkg}`); // List local packages and check for the specified package
+    return result.includes(pkg); // If the package exists, return true
+  } catch (error) {
+    return false; // If an error occurs, assume the package isn't installed
+  }
+}
+
+
+// Function to install or upgrade the list of packages
+async function installPackages() {
+
+  // Loop through each package and try to install or upgrade it using Chocolatey
+   const promises = packages.map(async (pkg) => {
+    const isInstalled = await checkIfPackageInstalled(pkg); // Check if the package is already installed
+    if (!isInstalled) {
+      logToFile(`Installing ${pkg}...`);
+      await runCommand(`choco upgrade ${pkg} -y --ignore-checksums`); // Install or upgrade the package
+      logToFile(`${pkg} installed or upgraded successfully.`);
+    } else {
+      logToFile(`${pkg} is already installed.`);
     }
     } catch (error) {
       // If an error occurs, log a warning
@@ -118,6 +150,16 @@ async function installPackages() {
   }
 }
 
+// Function to install dependencies before installing the main package
+async function installWithDependencies(pkg, dependencies) {
+  // Install each dependency first, if not already installed
+  for (const dep of dependencies) {
+    const isDepInstalled = await checkIfPackageInstalled(dep);
+    if (!isDepInstalled) {
+      logToFile(`Installing dependency: ${dep}...`);
+      await runCommand(`choco install ${dep} -y`); // Install the dependency
+    }
+  }
 
 // Function to install and update WSL
 async function installOrUpdateWSL() {
@@ -182,10 +224,21 @@ async function main() {
     // Step 5: Install or upgrade all the packages
     await installPackages();
     
-    console.log('All packages processed.'); // Final success message
+   // Install or upgrade the packages concurrently
+    await installPackagesConcurrently(packages);
+
+    // Step 4: Cleanup temporary files and caches after installation
+    await cleanup();
+
+    // Step 5: Prompt for system restart if needed
+    await promptForRestart();
+
+    // Log the success message
+    logToFile('All tasks completed successfully.');
   } catch (error) {
-    // Catch and log any errors that occurred during the process
-    console.error('Error:', error);
+    // If an error occurs at any point, log the error to the file
+    logToFile(`Error: ${error}`);
+    console.error('Error:', error); // Also log it to the console
   }
 }
 
