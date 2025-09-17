@@ -236,6 +236,13 @@ async function promptForRestart() {
 // Main function that runs all tasks sequentially
 async function main() {
     try {
+
+        const args = process.argv.slice(2); // Get command-line arguments
+        const isWslUpdateOnly = args.includes('--wsl'); // Check for --wsl flag
+        const isDriverUpdateOnly = args.includes('--driver'); // Check for --driver flag
+        const isPakagesOnly = args.includes('--pack'); // Check for --pack flag
+
+        
         // Step 1: Check if the script is running with admin privileges
         await checkAdminPrivileges();
 
