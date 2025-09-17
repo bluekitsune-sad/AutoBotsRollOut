@@ -94,19 +94,6 @@ function logToFile(message) {
   fs.appendFileSync(logFile, `[${timestamp}] ${message}\n`); // Append the log entry to the log file
 }
 
-// Function to execute a shell command and return a promise
-function runCommand(command) {
-  return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        reject(`Error: ${stderr || error.message}`); // Reject with error message if something goes wrong
-      } else {
-        resolve(stdout); // Resolve with the command output if it succeeds
-      }
-    });
-  });
-}
-
 // Function to update Chocolatey itself (the package manager)
 async function updateChocolatey() {
   console.log('Updating Chocolatey...');
