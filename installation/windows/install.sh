@@ -102,6 +102,28 @@ async function installPackages() {
   }
 }
 
+
+// Function to install and update WSL
+async function installOrUpdateWSL() {
+  try {
+    // Check if WSL is installed by running 'wsl --list'
+    const wslCheck = await runCommand('wsl --list');
+    if (!wslCheck) {
+      console.log('Installing WSL...');
+      await runCommand('choco install wsl -y'); // Install WSL using Chocolatey
+    } else {
+      console.log('Updating WSL...');
+      await runCommand('wsl --update'); // Update WSL to the latest version
+    }
+
+    // Optionally, set the default distro (e.g., Ubuntu)
+    console.log('Setting default WSL distribution...');
+    await runCommand('wsl --set-default Ubuntu'); // Set Ubuntu as the default distribution
+  } catch (error) {
+    console.error('Error managing WSL:', error);
+  }
+}
+
 // Main function that runs all tasks sequentially
 async function main() {
   try {
@@ -110,8 +132,11 @@ async function main() {
     
     // Step 2: Update Chocolatey to ensure we're using the latest version
     await updateChocolatey();
-    
-    // Step 3: Install or upgrade all the packages
+
+    // Step 3: Install or update WSL
+    await installOrUpdateWSL();
+
+    // Step 4: Install or upgrade all the packages
     await installPackages();
     
     console.log('All packages processed.'); // Final success message
