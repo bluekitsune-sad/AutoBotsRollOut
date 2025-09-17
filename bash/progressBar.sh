@@ -31,7 +31,7 @@ progress-bar() {
     s+=']'  # Close the progress bar
 
     # Print the progress bar with the current and total progress, and percentage completed
-    echo -ne "$s $current/$len ($perc_done%)\r"
+    echo -ne "\r$s $current/$len ($perc_done%)" # \r means to get the cursor at same line
 }
 
 # Function to simulate processing of files (replace with actual commands)
