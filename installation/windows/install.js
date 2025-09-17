@@ -237,7 +237,11 @@ async function main() {
     await cleanup();
 
     // Step 7: Prompt for system restart if needed
-    // await promptForRestart();
+    const restartNeeded = await promptForRestart();
+    if (restartNeeded) {
+      console.log('Restarting system...');
+      await runCommand('shutdown -r -t 0');
+    }
 
     // Log the success message
     logToFile('All tasks completed successfully.');
